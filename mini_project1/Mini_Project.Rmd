@@ -1,0 +1,108 @@
+1```{r, include= FALSE}
+#install.packages("Lahman")
+library(tidyverse)
+library(Lahman)
+```
+# The 2018 Boston Red Sox and their Infamous Outfield: Were they the Ticket to Victory?
+#### By Ivy Maynard - 3/10/2025
+
+### Introduction
+
+Anyone familiar with the MLB remembers the decade and a half of Red Sox domination in the 2000s. Most people probably think of the curse-breaking 2004 win; however, the 2018 Red Sox were nothing to scoff at. With 108 regular season wins, a 7-2 postseason record, and more individual accolades than you can count, that team secured their World Series title without much contention. 
+
+Today, I am diving deeper into the notorious outfield of the 2018 Red Sox. Mainly compromised of Andrew Benintendi, Jackie Bradley Jr., and Mookie Betts, not only was the lineup full of power hitters, but it was impressively difficult for fly balls to drop when the outfield was at the top of its game. When the Red Sox faced the Huston Astros in the ALCS, the most memorable play was the series-ending layout catch by Benintendi. Expert fielding robbed Manny Machado of a home run in the series against the Dodgers that could have cost them. The public tends to credit the above-average defense for a large majority of that World Series win, as do I. However, what a team looks like on the surface may not be what we think.
+
+The question I want to answer is, how significant were the outfielder's defensive skills in the 2018 World Series win? Were they even that exceptional at all? 
+
+While there are countless ways to judge the performance of an outfield and their contributions to wins, I will be looking at errors, both by individual fielders and their teams. An error is a common statistic in baseball that tracks defensive mistakes that negatively impact a player's team. For example, if an outfielder drops a ball that they could have easily caught and that results in a run scored by the opposing team, that player will be credited with an error because it is assumed that any player at the professional level should have been able to successfully make that play.
+
+While errors are not a comprehensive measure of defensive performance, and they are awarded based on the decision of an Official Scorer, I was interested to see if either the Red Sox or the Dodgers had an error total significantly higher than the other team and how that coincided with the outcome of the postseason that year.
+
+### Analysis and Visualization 
+
+```{r, include = FALSE}
+fielding_WS18 <- FieldingOFsplit |> 
+  filter(teamID == "BOS"| teamID == "LAN",
+         yearID == 2018)|> 
+  select( c(1, 2, 4, 9, 6,  12)) |> 
+  group_by(teamID) |> 
+  mutate(
+    sum_E = sum(E)) |>
+  arrange(desc(InnOuts))
+
+fielding_WS18
+```
+
+To examine the impact of errors on the 2018 season, I used the Lahman dataset to find data on the Red Sox and their World Series opponent, the Los Angeles Dodgers in that season. The Lahman dataset is the collection of all tables in the Sean Lahman Baseball Database which display data collected by Lahman regarding pitching, hitting, fielding, and all other MLB statistics. The database contains MLB data from 1817 to 2023.
+
+To begin my analysis of errors in relation to the 2018 World Series, I found data on all the outfielders who played games for both teams in 2018, and I compiled total errors over the regular season for both teams respectively. As you can see in the graph below, the Red Sox had 13 total errors over the season and the Dodgers had 17. I chose to use a bar graph as a way to visually represent the total errors earned over the course of the season for each team. I color coded the bars for each team based on their official colors and altered the size of the text in the graphs in order to increase readability.
+
+
+```{r}
+fielding_WS18 |> 
+  ggplot(aes(
+    x = teamID, 
+    y = sum_E, 
+    fill = teamID)
+    ) + 
+  geom_bar(
+    position = "dodge", 
+    stat = "identity"
+) + 
+  labs(
+    title = "Total Errors by Team in the 2018 MLB Season",
+    x = "Team",
+    y = "Total Errors",
+    fill = "Team"
+  ) +
+  scale_fill_manual(values = c("red", "royalblue")) +
+  theme(
+    plot.title = element_text(
+      size = 19,
+      hjust = .5)
+  )
+```
+
+I also wanted to look closer at the breakdown of errors by individual players. This is to see if either team had one or more players significantly contributing to the teams error total and possibly skewing the data. I created a scatterplot of errors by total time played (as expressed by outs) to show the distribution of play time vs errors for each player. Each player is color coded based on the team they played for in 2018 in order to help visualize the differences between the two teams. I chose a scatterplot because it displays the distribution of errors according to play time and it highlights and outliers, inconsistencies, and notable features of the data.
+
+```{r}
+fielding_WS18 |> 
+  ggplot(aes(
+    x = InnOuts,
+    y = E,
+    color = teamID
+  )
+) +
+  geom_point() +
+  labs(
+    title = "Individual Errors vs Total Time Played",
+    subtitle = "for the 2018 Boston red Sox and Los Angeles Dodgers",
+    x = "Time Played (outs)",
+    y = "Errors",
+    color = "Team"
+  ) +
+  scale_color_manual(values = c("red", "royalblue"))+
+  theme(
+    plot.title = element_text(
+      size = 19,
+      hjust = .5),
+    plot.subtitle = element_text(
+      hjust = .5)
+    ) 
+```
+
+There are a few notable characteristics to point out regarding tis plot. First, the three Red Sox players with the highest play time were the aforementioned outfielders: Betts (1 error), Benintendi (3 errors), and Bradley Jr. (5 errors). All other Red Sox outfielders that season played less than 1000 outs and had 2 or less errors attributed to them.
+
+As for the Dodgers, their outfield playtime was distributed more evenly over their players, with Yasiel Puig (8 errors) being the only notable outlier with just under 3000 outs played. 
+
+This scatterplot shows a positive and nonlinear relationship between time played and errors with moderate strength.
+
+### Conclusion and Data Interpretation
+
+The first thing that this analysis uncovers is that the team who won the World Series in 2018 had less errors than the team who lost. It also shows us that the most played Red Sox outfielders all had less errors and more individual play time than the highest played Dodgers outfielder of that year. All of this seems to point to the fact that the Red Sox had a more consistent outfield with higher overall performance, and that may be true.
+
+However, while there may be some notable trends in this data, this analysis suggests that errors may not be comprehensive enough of a statistic to make judgments about a team's outfield and their relationship to overall success. 
+
+One detail that suggests errors are not a great measure for determining outfield success is that Jackie Bradley Jr. was regarded as one of the strongest defensive players in the league at the time, and in 2018, he had the highest error count of all outfielders on the Red Sox. I think it's important to examine total errors with respect to time played because this reveals that he had spent more time in the outfield than any other Red Sox player, therefore creating more room for errors. He also had three fewer errors than the Dodgers leader and more overall playtime, suggesting that his defensive contribution was an asset to the team regardless of his error count.
+
+To further the significance of this analysis, a study conducted to see how each of these errors affected the outcome of the game could be very valuable. If one team's errors were significant enough to lead to game-winning runs, that might suggest that there is a deeper flaw in a team's defense, especially when the stakes are high and runs are on the line--contributing to their ability to perform defensively in the World Series. While this analysis does not prove that the Red Sox outfield guaranteed the team's 2018 win, it sparks conversation about the significance of defensive performance and the ability of certain common statistics to track the quality of a player.
